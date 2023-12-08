@@ -1,6 +1,7 @@
 package ClientNode;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -28,22 +29,24 @@ public class SensorNode {
   }
 
   public void sendSensorData() {
-    JSONObject data = new JSONObject();
-    data.put("id", this.id);
-    ObjectMapper mapper = new ObjectMapper();
-    try {
-      String sensorsJson = mapper.writeValueAsString(this.sensors);
-      String actuatorsJson = mapper.writeValueAsString(this.actuators);
+    JSONObject json = new JSONObject();
+    json.put("id", this.id);
 
-      data.put("sensors", sensorsJson);
-      data.put("actuators", actuatorsJson);
-
-      out.println(data.toString());
-      System.out.println("Sent data from node " + id + ": " + data.toString());
-
-    } catch (JsonProcessingException e) {
-      e.printStackTrace();
+    JSONArray sensorsJsonArray = new JSONArray();
+    for (Map.Entry<Long, Sensor> entry : sensors.entrySet()) {
+      sensorsJsonArray.put(entry.getValue().toJSON());
     }
+    json.put("sensors", sensorsJsonArray);
+
+    JSONArray actuatorsJsonArray = new JSONArray();
+    for (Map.Entry<Long, Actuator> entry : actuators.entrySet()) {
+      actuatorsJsonArray.put(entry.getValue().toJSON());
+    }
+    json.put("actuators", actuatorsJsonArray);
+
+    out.println(json.toString());
+    System.out.println("Sent data to server: " + json.toString());
+
   }
 
 

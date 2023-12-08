@@ -1,5 +1,7 @@
 package ClientNode;
 
+import org.json.JSONObject;
+
 /**
  * Represents a sensor in a network of sensor/actuator nodes.
  * Each sensor has a unique identifier, a type, and a value.
@@ -82,5 +84,13 @@ public class Sensor {
    */
   public void randomizeValue() {
     value = Math.random() * 100;
+  }
+
+  public JSONObject toJSON() {
+    JSONObject json = new JSONObject();
+    json.put("id", id);
+    json.put("type", type);
+    json.put("value", value);
+    return json;
   }
 }

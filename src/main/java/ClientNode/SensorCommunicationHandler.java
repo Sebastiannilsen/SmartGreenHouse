@@ -8,12 +8,21 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * The type Sensor communication handler.
+ */
 public class SensorCommunicationHandler {
 
   private String serverAddress;
   private int serverPort;
   private List<SensorNode> sensorNodes;
 
+  /**
+   * Instantiates a new Sensor communication handler.
+   *
+   * @param serverAddress the server address
+   * @param serverPort    the server port
+   */
   public SensorCommunicationHandler(String serverAddress, int serverPort) {
     this.serverAddress = serverAddress;
     this.serverPort = serverPort;
@@ -21,6 +30,9 @@ public class SensorCommunicationHandler {
     initializeSensorNodes();
   }
 
+  /**
+   * Creates dummy sensor nodes and adds them to the list of sensor nodes.
+   */
   private void initializeSensorNodes() {
     long id = 1;
 
@@ -52,6 +64,9 @@ public class SensorCommunicationHandler {
     sensorNodes.add(sensorNode2);
   }
 
+  /**
+   * Start sending data.
+   */
   public void startSendingData() {
     for (SensorNode node : sensorNodes) {
       try {
@@ -65,6 +80,11 @@ public class SensorCommunicationHandler {
     }
   }
 
+  /**
+   * The entry point of application.
+   *
+   * @param args the input arguments
+   */
   public static void main(String[] args) {
     SensorCommunicationHandler handler = new SensorCommunicationHandler("localhost", 12345);
     handler.startSendingData();

@@ -1,5 +1,7 @@
 package ClientNode;
 
+import org.json.JSONObject;
+
 public class Actuator {
   private boolean isOn;
   private String type;
@@ -34,5 +36,13 @@ public class Actuator {
 
   public void setOn(boolean isOn) {
     this.isOn = isOn;
+  }
+
+  public JSONObject toJSON() {
+    JSONObject json = new JSONObject();
+    json.put("id", this.id);
+    json.put("type", this.type);
+    json.put("isOn", this.isOn);
+    return json;
   }
 }
