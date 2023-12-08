@@ -22,13 +22,9 @@ public class SensorServer {
       System.out.println("Server started. Listening on port " + port);
 
       while (true) {
-        try (Socket clientSocket = serverSocket.accept();
-             BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()))) {
-
-          String line;
-          while ((line = reader.readLine()) != null) {
-            handleSensorData(line);
-          }
+        try {
+          Socket clientSocket = serverSocket.accept();
+          new ClientHandler(clientSocket).start();
         } catch (IOException e) {
           System.err.println("Error handling client connection: " + e.getMessage());
         }
@@ -38,19 +34,44 @@ public class SensorServer {
     }
   }
 
-  private void handleSensorData(String jsonData) {
-    try {
-      JSONObject data = new JSONObject(jsonData);
-      forwardToControlPanel(data);
-    } catch (Exception e) {
-      System.err.println("Error processing sensor data: " + e.getMessage());
-    }
-  }
+  private static class ClientHandler extends Thread {
+    private Socket clientSocket;
 
-  private void forwardToControlPanel(JSONObject data) {
-    // Implement this method to forward the data to the control panel.
-    // This could involve updating a GUI, sending the data over a network, etc.
-    System.out.println("Received data: " + data.toString());
+    public ClientHandler(Socket socket) {
+      this.clientSocket = socket;
+    }
+
+    public void run() {
+      System.out.println("Accepted connection from client! - " + clientSocket.getInetAddress().getHostAddress() + ":" + clientSocket.getPort());
+      try (BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()))) {
+        String line;
+        while ((line = reader.readLine()) != null) {
+          handleSensorData(line);
+        }
+      } catch (IOException e) {
+        System.err.println("Error reading data from client: " + e.getMessage());
+      } finally {
+        try {
+          clientSocket.close();
+          System.out.println("Closed client socket");
+        } catch (IOException e) {
+          System.err.println("Error closing client socket: " + e.getMessage());
+        }
+      }
+    }
+
+    private void handleSensorData(String jsonData) {
+      try {
+        JSONObject data = new JSONObject(jsonData);
+        forwardToControlPanel(data);
+      } catch (Exception e) {
+        System.err.println("Error processing sensor data: " + e.getMessage());
+      }
+    }
+
+    private void forwardToControlPanel(JSONObject data) {
+      System.out.println("Received data: " + data.toString());
+    }
   }
 
   public static void main(String[] args) {

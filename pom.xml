@@ -4,8 +4,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.example</groupId>
-    <artifactId>my-java17-app</artifactId>
+    <groupId>no.ntnu</groupId>
+    <artifactId>SmartGrennhouse</artifactId>
     <version>1.0.0</version>
 
     <properties>
@@ -29,6 +29,5 @@
             <artifactId>jackson-databind</artifactId>
             <version>2.14.1</version>
         </dependency>
-
     </dependencies>
 </project>
