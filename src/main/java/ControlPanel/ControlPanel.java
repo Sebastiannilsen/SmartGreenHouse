@@ -16,7 +16,7 @@ import java.util.Map;
 public class ControlPanel {
 
   private Map<String, DefaultListModel<String>> sensorListModelMap;
-  private Map<String, DefaultListModel<JToggleButton>> actuatorListModelMap;
+  private Map<String, DefaultListModel<JCheckBox>> actuatorListModelMap;
   private Map<String, JFrame> sensorFrames;
 
   public ControlPanel() {
@@ -34,8 +34,8 @@ public class ControlPanel {
     JList<String> sensorList = new JList<>(sensorListModel);
     JScrollPane sensorScrollPane = new JScrollPane(sensorList);
 
-    DefaultListModel<JToggleButton> actuatorListModel = new DefaultListModel<>();
-    JList<JToggleButton> actuatorList = new JList<>(actuatorListModel);
+    DefaultListModel<JCheckBox> actuatorListModel = new DefaultListModel<>();
+    JList<JCheckBox> actuatorList = new JList<>(actuatorListModel);
     actuatorList.setCellRenderer(new ActuatorListCellRenderer());
     actuatorList.setSelectionModel(new NoSelectionModel()); // Disable selection
     JScrollPane actuatorScrollPane = new JScrollPane(actuatorList);
@@ -79,15 +79,14 @@ public class ControlPanel {
             sensorListModel.addElement(displayText);
           }
 
-          DefaultListModel<JToggleButton> actuatorListModel = actuatorListModelMap.get(nodeId);
+          DefaultListModel<JCheckBox> actuatorListModel = actuatorListModelMap.get(nodeId);
           actuatorListModel.removeAllElements();
           for (int i = 0; i < actuators.length(); i++) {
             JSONObject actuator = actuators.getJSONObject(i);
             String actuatorType = actuator.getString("type");
             boolean actuatorValue = actuator.getBoolean("isOn");
-            JToggleButton toggleButton = new JToggleButton(actuatorType);
-            toggleButton.setSelected(actuatorValue);
-            actuatorListModel.addElement(toggleButton);
+            JCheckBox checkBox = new JCheckBox(actuatorType, actuatorValue);
+            actuatorListModel.addElement(checkBox);
           }
         });
       }
@@ -97,9 +96,9 @@ public class ControlPanel {
     }
   }
 
-  private static class ActuatorListCellRenderer implements ListCellRenderer<JToggleButton> {
+  private static class ActuatorListCellRenderer implements ListCellRenderer<JCheckBox> {
     @Override
-    public Component getListCellRendererComponent(JList<? extends JToggleButton> list, JToggleButton value, int index, boolean isSelected, boolean cellHasFocus) {
+    public Component getListCellRendererComponent(JList<? extends JCheckBox> list, JCheckBox value, int index, boolean isSelected, boolean cellHasFocus) {
       return value;
     }
   }
