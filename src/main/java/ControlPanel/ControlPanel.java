@@ -5,6 +5,10 @@ import org.json.JSONObject;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -18,6 +22,7 @@ public class ControlPanel {
   private Map<String, DefaultListModel<String>> sensorListModelMap;
   private Map<String, DefaultListModel<JCheckBox>> actuatorListModelMap;
   private Map<String, JFrame> sensorFrames;
+  private PrintWriter out; // To send data back to the server
 
   public ControlPanel() {
     sensorListModelMap = new HashMap<>();
@@ -37,7 +42,19 @@ public class ControlPanel {
     DefaultListModel<JCheckBox> actuatorListModel = new DefaultListModel<>();
     JList<JCheckBox> actuatorList = new JList<>(actuatorListModel);
     actuatorList.setCellRenderer(new ActuatorListCellRenderer());
-    actuatorList.setSelectionModel(new NoSelectionModel()); // Disable selection
+    actuatorList.setSelectionModel(new NoSelectionModel());
+    actuatorList.addMouseListener(new MouseAdapter() {
+      @Override
+      public void mouseClicked(MouseEvent e) {
+        int index = actuatorList.locationToIndex(e.getPoint());
+        if (index != -1) {
+          JCheckBox checkBox = actuatorListModel.getElementAt(index);
+          checkBox.setSelected(!checkBox.isSelected());
+          actuatorList.repaint();
+          handleActuatorClick(sensorId, checkBox);
+        }
+      }
+    });
     JScrollPane actuatorScrollPane = new JScrollPane(actuatorList);
 
     JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, sensorScrollPane, actuatorScrollPane);
@@ -49,10 +66,24 @@ public class ControlPanel {
     sensorFrames.put(sensorId, frame);
   }
 
+  private void handleActuatorClick(String sensorId, JCheckBox checkBox) {
+    JSONObject json = new JSONObject();
+    json.put("id", sensorId);
+    String buttonText = checkBox.getText();
+    int actuatorId = Integer.parseInt(buttonText.split(":")[0].trim());
+    String actuatorType = buttonText.split(":")[1].trim();
+    json.put("type", actuatorType);
+    json.put("actuatorId", actuatorId);
+    json.put("value", checkBox.isSelected());
+    System.out.println(json.toString());
+    out.println(json.toString());
+  }
+
+
   public void connectToServer(String host, int port) {
     try {
       Socket socket = new Socket(host, port);
-      PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+      out = new PrintWriter(socket.getOutputStream(), true);
       out.println("CONTROL_PANEL");
 
       BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -85,7 +116,10 @@ public class ControlPanel {
             JSONObject actuator = actuators.getJSONObject(i);
             String actuatorType = actuator.getString("type");
             boolean actuatorValue = actuator.getBoolean("isOn");
-            JCheckBox checkBox = new JCheckBox(actuatorType, actuatorValue);
+            long actuatorId = actuator.getLong("id");
+            String displayText = actuatorId + ":" + actuatorType;
+            JCheckBox checkBox = new JCheckBox(displayText, actuatorValue);
+            checkBox.setEnabled(true);
             actuatorListModel.addElement(checkBox);
           }
         });
