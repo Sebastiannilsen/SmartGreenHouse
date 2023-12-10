@@ -6,12 +6,15 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class SensorServer {
 
   private int port;
   private List<Socket> controlPanelSockets = new ArrayList<>();
+  private Map<Long, Socket> sensorNodeSockets = new HashMap<>();
 
   public SensorServer(int port) {
     this.port = port;
@@ -47,6 +50,10 @@ public class SensorServer {
         String clientType = reader.readLine();
         if (clientType.equals("SENSOR_NODE")) {
           System.out.println("Sensor node connected");
+          long sensorNodeId = Long.parseLong(reader.readLine());
+          synchronized (sensorNodeSockets) {
+            sensorNodeSockets.put(sensorNodeId, clientSocket);
+          }
           while ((line = reader.readLine()) != null) {
             handleSensorData(line);
           }
@@ -57,6 +64,7 @@ public class SensorServer {
           }
           while ((line = reader.readLine()) != null) {
             // handle any incoming data from control panels, if necessary
+            handleControlPanelActuatorChange(line);
           }
         } else {
           System.err.println("Unknown client type");
@@ -96,6 +104,19 @@ public class SensorServer {
           }
         }
       }
+    }
+  }
+
+  private void handleControlPanelActuatorChange(String line) {
+    try{
+      JSONObject data = new JSONObject(line);
+      long sensorNodeId = data.getLong("id");
+      Socket sensorNodeSocket = sensorNodeSockets.get(sensorNodeId);
+      PrintWriter out = new PrintWriter(sensorNodeSocket.getOutputStream(), true);
+      out.println(data.toString());
+      System.out.println("Sent actuator change to sensor node");
+    } catch (Exception e) {
+      System.err.println("Error processing sensor data: " + e.getMessage());
     }
   }
 

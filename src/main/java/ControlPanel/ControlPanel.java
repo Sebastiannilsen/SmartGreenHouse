@@ -19,9 +19,9 @@ import java.util.Map;
 
 public class ControlPanel {
 
-  private Map<String, DefaultListModel<String>> sensorListModelMap;
-  private Map<String, DefaultListModel<JCheckBox>> actuatorListModelMap;
-  private Map<String, JFrame> sensorFrames;
+  private Map<Long, DefaultListModel<String>> sensorListModelMap;
+  private Map<Long, DefaultListModel<JCheckBox>> actuatorListModelMap;
+  private Map<Long, JFrame> sensorFrames;
   private PrintWriter out; // To send data back to the server
 
   public ControlPanel() {
@@ -30,7 +30,7 @@ public class ControlPanel {
     sensorFrames = new HashMap<>();
   }
 
-  private void createSensorWindow(String sensorId) {
+  private void createSensorWindow(long sensorId) {
     JFrame frame = new JFrame("Sensor " + sensorId);
     frame.setSize(400, 500);
     frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -66,7 +66,7 @@ public class ControlPanel {
     sensorFrames.put(sensorId, frame);
   }
 
-  private void handleActuatorClick(String sensorId, JCheckBox checkBox) {
+  private void handleActuatorClick(long sensorId, JCheckBox checkBox) {
     JSONObject json = new JSONObject();
     json.put("id", sensorId);
     String buttonText = checkBox.getText();
@@ -90,7 +90,7 @@ public class ControlPanel {
       String line;
       while ((line = in.readLine()) != null) {
         JSONObject json = new JSONObject(line);
-        String nodeId = String.valueOf(json.getDouble("id"));
+        long nodeId = json.getLong("id");
         JSONArray sensors = json.getJSONArray("sensors");
         JSONArray actuators = json.getJSONArray("actuators");
 
