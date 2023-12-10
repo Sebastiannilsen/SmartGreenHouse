@@ -1,17 +1,17 @@
 package Server;
 
-import ClientNode.SensorNode; // Import your SensorNode class or the package it resides in
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SensorServer {
 
   private int port;
+  private List<Socket> controlPanelSockets = new ArrayList<>();
 
   public SensorServer(int port) {
     this.port = port;
@@ -34,7 +34,7 @@ public class SensorServer {
     }
   }
 
-  private static class ClientHandler extends Thread {
+  private class ClientHandler extends Thread {
     private Socket clientSocket;
 
     public ClientHandler(Socket socket) {
@@ -42,16 +42,32 @@ public class SensorServer {
     }
 
     public void run() {
-      System.out.println("Accepted connection from client! - " + clientSocket.getInetAddress().getHostAddress() + ":" + clientSocket.getPort());
       try (BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()))) {
         String line;
-        while ((line = reader.readLine()) != null) {
-          handleSensorData(line);
+        String clientType = reader.readLine();
+        if (clientType.equals("SENSOR_NODE")) {
+          System.out.println("Sensor node connected");
+          while ((line = reader.readLine()) != null) {
+            handleSensorData(line);
+          }
+        } else if (clientType.equals("CONTROL_PANEL")) {
+          System.out.println("Control panel connected");
+          synchronized (controlPanelSockets) {
+            controlPanelSockets.add(clientSocket);
+          }
+          while ((line = reader.readLine()) != null) {
+            // handle any incoming data from control panels, if necessary
+          }
+        } else {
+          System.err.println("Unknown client type");
         }
       } catch (IOException e) {
         System.err.println("Error reading data from client: " + e.getMessage());
       } finally {
         try {
+          synchronized (controlPanelSockets) {
+            controlPanelSockets.remove(clientSocket);
+          }
           clientSocket.close();
           System.out.println("Closed client socket");
         } catch (IOException e) {
@@ -70,7 +86,16 @@ public class SensorServer {
     }
 
     private void forwardToControlPanel(JSONObject data) {
-      System.out.println("Received data: " + data.toString());
+      synchronized (controlPanelSockets) {
+        for (Socket socket : controlPanelSockets) {
+          try {
+            PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+            out.println(data.toString());
+          } catch (IOException e) {
+            System.err.println("Error forwarding data to control panel: " + e.getMessage());
+          }
+        }
+      }
     }
   }
 

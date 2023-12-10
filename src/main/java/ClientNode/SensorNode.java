@@ -26,6 +26,7 @@ public class SensorNode {
   public void connectToServer(String serverAddress, int serverPort) throws IOException {
     this.socket = new Socket(serverAddress, serverPort);
     this.out = new PrintWriter(socket.getOutputStream(), true);
+    out.println("SENSOR_NODE");
   }
 
   public void sendSensorData() {
