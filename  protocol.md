@@ -6,16 +6,36 @@ This document outlines the communication protocol used in our sensor network pro
 multiple sensor nodes, and multiple control panels. The server acts as a central hub, managing communication between the
 control panels and the sensor nodes.
 
-## Communication Participants
+---
+
+## Communication Participants / Terminology
 
 - **Server:** Central hub that handles incoming connections and forwards messages between sensor nodes and the control
   panel.
 - **Sensor Node:** Client that sends sensor data to the server and receives actuator commands.
 - **Control Panel:** Client that receives sensor data from the server and sends actuator commands.
 
-## Message Format
+---
 
-All messages containing data are formatted in JSON for consistency and ease of parsing.
+## Transport and Port
+- **Transport:** TCP (Transmission Control Protocol)
+- **Port Number:** 12345 (example)
+
+---
+
+## Architecture
+Insert architecture diagram here.
+Image in the resources folder.
+![Diagram of the architecture](/src/main/resources/structure.png)
+
+
+---
+
+## Protocol Type
+- **Connection-oriented:** The protocol uses TCP, ensuring a reliable connection.
+- **Statefulness:** The protocol is stateful as it maintains the state of each sensor node and actuator.
+
+---
 
 ## Communication Details
 
@@ -80,10 +100,11 @@ All messages containing data are formatted in JSON for consistency and ease of p
 - The server forwards actuator commands to the respective sensor node.
 - The format is identical to the one used by the control panel.
 
-### 4. Error Handling
+---
 
-- All clients should handle potential JSON parsing errors and connection issues gracefully.
-- Error messages should be logged for debugging purposes.
+## Error Handling
+- **Unexpected Message Format:** Such messages are logged and ignored.
+- **Connection Issues:** Attempt reconnection; log errors.
 
 ---
 
@@ -96,5 +117,9 @@ All messages containing data are formatted in JSON for consistency and ease of p
 5. **The server forwards these commands to the respective sensor nodes.**
 
 ---
+
+## Reliability Mechanisms
+- TCP's inherent mechanisms for ensuring message delivery and order.
+
 
 
