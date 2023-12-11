@@ -75,8 +75,8 @@ public class SensorCommunicationHandler {
       try {
         node.connectToServer(serverAddress, serverPort);
         ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
-        executor.scheduleAtFixedRate(node::randomizeAllSensors, 0, 20, TimeUnit.SECONDS);
-        executor.scheduleAtFixedRate(node::sendSensorData, 0, 20, TimeUnit.SECONDS);
+        executor.scheduleAtFixedRate(node::randomizeAllSensors, 0, 5, TimeUnit.SECONDS);
+        executor.scheduleAtFixedRate(node::sendSensorData, 0, 5, TimeUnit.SECONDS);
       } catch (IOException e) {
         e.printStackTrace();
       }
