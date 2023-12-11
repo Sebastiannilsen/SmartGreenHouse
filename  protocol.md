@@ -24,8 +24,6 @@ control panels and the sensor nodes.
 ---
 
 ## Architecture
-Insert architecture diagram here.
-Image in the resources folder.
 ![Diagram of the architecture](/src/main/resources/structure.png)
 
 
