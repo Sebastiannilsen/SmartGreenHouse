@@ -19,7 +19,7 @@ control panels and the sensor nodes.
 
 ## Transport and Port
 - **Transport:** TCP (Transmission Control Protocol)
-- **Port Number:** 12345 (example)
+- **Port Number:** 12345 (Can be changed in the main method of the different classes)
 
 ---
 
